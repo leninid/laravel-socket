@@ -6,6 +6,8 @@ use Codemash\Socket\Message;
 use Exception;
 use Auth;
 use Config;
+use App\User;
+use App\Player;
 
 class Client {
 
@@ -34,6 +36,26 @@ class Client {
      */
     public $ip;
 
+    /**
+     * The Id of the client.
+     *
+     * @var string
+     */
+    public $clientId;
+
+    /**
+     * The organisation of the client.
+     *
+     * @var string
+     */
+    public $orgId;
+
+    /**
+     * Type of the client.
+     *
+     * @var string
+     */
+    public $type;
 
     /**
      * The session manager.
@@ -62,6 +84,27 @@ class Client {
 
         $this->ip = $connection->remoteAddress;
 
+        $params = $connection->WebSocket->request->getQuery()->toArray();
+        
+        if ($params) {
+            $this->type = $params['type'];
+        }
+
+        if ($this->type == 'web') {
+            $client = User::where('api_token', $params['token'])->first();
+            if ($client != null) {
+                $this->clientId = $client->id;
+                $this->orgId = $client->org;
+            }
+        }
+
+        if ($this->type == 'player') {
+            $client = Player::where('token', $params['token'])->first();
+            if ($client != null) {
+                $this->clientId = $client->id;
+                $this->orgId = $client->owner;
+            }
+        }
         // Check if client is behind a proxy.
         if (!$this->ip) {
             $this->ip = $connection->WebSocket->request->getHeader('X-Forwarded-For');

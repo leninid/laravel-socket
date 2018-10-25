@@ -1,5 +1,5 @@
 {
-    "name": "leninid/laravel-socket",
+    "name": "codemash/laravel-socket",
     "description": "A socket implementation for Laravel 5",
     "version": "1.0.1",
     "require": {
